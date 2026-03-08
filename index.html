@@ -3,217 +3,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MC News Pro</title>
+    <title>MC News</title>
     <style>
-        /* SETUP GENERALE - TUTTO IN GRASSETTO */
+        :root {
+            --neon: #72FF13;
+            --bg: #080808;
+            --card: rgba(255, 255, 255, 0.05);
+            --ds-blurple: #5865F2;
+        }
+
         * { 
-            box-sizing: border-box; 
-            margin: 0; padding: 0; 
-            font-weight: 900 !important; 
-            font-family: 'Arial Black', sans-serif;
+            box-sizing: border-box; margin: 0; padding: 0; 
+            font-weight: 900 !important; font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            margin: 0;
-            color: white;
-            background-color: #000;
-            overflow: hidden; /* Gestiamo lo scroll internamente */
-            height: 100vh;
+            background-color: var(--bg); color: white;
+            height: 100vh; width: 100vw; overflow: hidden;
         }
 
-        /* SFONDO RICHIESTO (MENO SFOCATO) */
-        .bg-mc {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), 
-                              url('https://server.wallpaperalchemy.com/storage/wallpapers/259/minecraft-4k-wallpaper-sunlit-forest-canopy.jpg');
-            background-size: cover;
-            background-position: center;
-            filter: blur(3px); /* Sfocatura ridotta come richiesto */
-            z-index: -1;
-            transform: scale(1.05);
+        /* SFONDO MODIFICATO: PIÙ VISIBILE E SFOCATO */
+        .bg-img {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            /* Ridotto l'oscuramento (da 0.7 a 0.35) per mostrare meglio l'immagine */
+            background: linear-gradient(rgba(0,0,0,0.35), var(--bg)), 
+                        url('https://server.wallpaperalchemy.com/storage/wallpapers/259/minecraft-4k-wallpaper-sunlit-forest-canopy.jpg');
+            background-size: cover; background-position: center;
+            filter: blur(10px); z-index: -1;
+            transform: scale(1.1);
         }
 
-        /* HEADER */
-        header { 
-            padding: 40px 20px 10px; 
-            text-align: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
-        }
-        .logo { font-size: 2.2rem; text-transform: uppercase; letter-spacing: -2px; }
-        .logo span { color: #72FF13; text-shadow: 0 0 15px #72FF13; }
+        header { padding: 30px 25px; display: flex; justify-content: space-between; align-items: center; }
+        /* NOME CAMBIATO IN MC NEWS */
+        .logo { font-size: 1.8rem; text-transform: uppercase; letter-spacing: -1.5px; }
+        .logo span { color: var(--neon); text-shadow: 0 0 15px var(--neon); }
 
-        /* CONTENITORE SLIDE (SWIPE) */
-        .wrapper {
-            display: flex;
-            width: 300vw; /* 3 sezioni */
-            height: calc(100vh - 180px);
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        .ds-btn {
+            width: 55px; height: 55px; background: var(--ds-blurple); border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 25px rgba(88, 101, 242, 0.5); transition: 0.3s;
         }
+        .ds-btn:active { transform: scale(0.85); }
+        .ds-btn svg { width: 32px; height: 32px; fill: white; }
 
-        .section {
-            width: 100vw;
-            height: 100%;
-            overflow-y: auto;
-            padding: 20px;
-            padding-bottom: 100px;
-        }
+        .viewport { width: 100vw; height: calc(100vh - 210px); overflow: hidden; position: relative; }
+        .wrapper { display: flex; width: 400vw; height: 100%; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .section { width: 100vw; height: 100%; overflow-y: auto; padding: 10px 20px 220px; -webkit-overflow-scrolling: touch; }
 
-        /* CARD MODERNE GLASS */
         .card {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: var(--card); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+            padding: 22px; margin-bottom: 15px; cursor: pointer; transition: 0.3s;
         }
+        .card:active { border-color: var(--neon); transform: scale(0.97); }
+        .card h2 { font-size: 1.1rem; color: #fff; text-transform: uppercase; margin-bottom: 5px; }
+        .card p { font-size: 0.85rem; color: #aaa; line-height: 1.4; }
 
-        .img-news { width: 100%; border-radius: 15px; margin-bottom: 10px; border: 2px solid #72FF13; }
-
-        /* BARRA SOTTO MODERNA */
-        .nav-container {
-            position: fixed;
-            bottom: 25px; left: 20px; right: 20px;
-            z-index: 999;
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.98); z-index: 10000;
+            display: none; padding: 40px 25px; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
         }
-
-        .nav-bar {
-            background: rgba(15, 15, 15, 0.9);
-            backdrop-filter: blur(25px);
-            border-radius: 25px;
-            display: flex;
-            padding: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            position: relative;
+        .modal-box { 
+            max-width: 500px; width: 100%; text-align: center;
+            transform: translateY(100px) scale(0.8); 
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .modal.active { display: flex; opacity: 1; }
+        .modal.active .modal-box { transform: translateY(0) scale(1); }
+        .modal.closing .modal-box { transform: translateY(100px) scale(0.7); opacity: 0; }
 
-        .nav-btn {
-            flex: 1;
-            border: none; background: none;
-            color: white; font-size: 0.75rem;
-            padding: 15px 0;
-            z-index: 2;
-            transition: 0.3s;
-            opacity: 0.5;
+        .modal h1 { color: var(--neon); font-size: 2.2rem; margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 0 15px var(--neon); }
+        .modal p { font-size: 1.1rem; line-height: 1.8; color: #ddd; margin-bottom: 40px; }
+        
+        .btn-action {
+            background: var(--neon); color: #000; padding: 20px; width: 100%;
+            border-radius: 20px; text-align: center; font-size: 1.1rem; cursor: pointer; margin-bottom: 10px;
         }
+        .btn-ds { background: var(--ds-blurple); color: white; border: none; font-size: 1.3rem; }
 
-        .nav-btn.selected {
-            opacity: 1;
-            color: #72FF13;
-        }
-
-        /* INDICATORE MOBILE NELLA BARRA */
-        .nav-indicator {
-            position: absolute;
-            height: 80%;
-            width: calc(33.33% - 10px);
-            background: rgba(114, 255, 19, 0.15);
-            border: 1px solid #72FF13;
-            border-radius: 18px;
-            top: 10%;
-            left: 5px;
-            transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-            z-index: 1;
-        }
-
-        .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 30px 0; text-align: center; }
+        .label { color: var(--neon); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 15px; }
+        .dots { display: flex; gap: 15px; justify-content: center; }
+        .dot { width: 10px; height: 10px; background: rgba(255,255,255,0.2); border-radius: 50%; transition: 0.4s; }
+        .dot.active { background: var(--neon); transform: scale(1.6); box-shadow: 0 0 15px var(--neon); }
     </style>
 </head>
 <body>
 
-    <div class="bg-mc"></div>
+    <div class="bg-img"></div>
 
     <header>
-        <div class="logo">MC <span>NEWS</span></div>
+        <div class="logo">MC <span>News</span></div>
+        <div class="ds-btn" onclick="openDS()">
+            <svg viewBox="0 0 127.14 96.36">
+                <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83,96.88,96.88,0,0,0-29.06,0A72.82,72.82,0,0,0,45.68,0,105.89,105.89,0,0,0,19.44,8.07C3.57,31.78-0.77,54.89,1.41,77.56a107.53,107.53,0,0,0,32.44,16.34,80.7,80.7,0,0,0,6.83-11.06,68.52,68.52,0,0,1-10.87-5.19c.92-.66,1.81-1.35,2.65-2.07a76.4,76.4,0,0,0,62.1,0c.87.72,1.75,1.41,2.68,2.07a69.05,69.05,0,0,1-10.87,5.19,81.21,81.21,0,0,0,6.83,11.06,107.13,107.13,0,0,0,32.44-16.34C128.84,50.7,119.34,28.09,107.7,8.07ZM42.45,65.69c-6.39,0-11.69-5.87-11.69-13.06s5.16-13.06,11.69-13.06,11.72,5.87,11.72,13.06S48.9,65.69,42.45,65.69Zm42.24,0c-6.39,0-11.69-5.87-11.69-13.06s5.16-13.06,11.69-13.06,11.72,5.87,11.72,13.06S84.75,65.69,84.69,65.69Z"/>
+            </svg>
+        </div>
     </header>
 
-    <div class="wrapper" id="mainWrapper">
-        
-        <div class="section">
-            <div class="card">
-                <img src="https://www.minecraft.net/content/dam/games/minecraft/key-art/Minecraft_Standard-Edition_Key-Art_1170x500.jpg" class="img-news">
-                <h2 style="color:#72FF13">NUOVO UPDATE</h2>
-                <p>ESPLORA LE TRIAL CHAMBERS OGGI STESSO!</p>
-            </div>
-            <div class="card">
-                <h2>SERVER PREMIUM</h2>
-                <p>NUOVI CONTENUTI AGGIUNTI AL MARKETPLACE.</p>
-            </div>
+    <div id="modal" class="modal">
+        <div class="modal-box">
+            <h1 id="mT"></h1>
+            <p id="mP"></p>
+            <div class="btn-action" onclick="closeAll()">CHIUDI</div>
         </div>
-
-        <div class="section">
-            <div class="card">
-                <h2 style="color:#72FF13; margin-bottom:15px;">STATO SERVER</h2>
-                <div class="row"><span>HYPIXEL</span> <span style="color:#72FF13">ONLINE</span></div>
-                <div class="row"><span>CORAL MC</span> <span style="color:#72FF13">ONLINE</span></div>
-                <div class="row" style="border:none"><span>PIKANET</span> <span style="color:#72FF13">ONLINE</span></div>
-            </div>
-        </div>
-
-        <div class="section">
-            <div class="card">
-                <h2 style="color:#72FF13">OPTIMINE MOD</h2>
-                <p>MASSIMIZZA LE PERFORMANCE DEL GIOCO.</p>
-                <div style="background:#72FF13; color:#000; padding:15px; border-radius:15px; margin-top:20px; text-align:center;">INSTALLA</div>
-            </div>
-        </div>
-
     </div>
 
-    <div class="nav-container">
-        <div class="nav-bar">
-            <div class="nav-indicator" id="indicator"></div>
-            <button class="nav-btn selected" onclick="moveTo(0)">NEWS</button>
-            <button class="nav-btn" onclick="moveTo(1)">SERVER</button>
-            <button class="nav-btn" onclick="moveTo(2)">MODS</button>
+    <div id="ds-modal" class="modal">
+        <div class="modal-box">
+            <h1 style="color: white;">DISCORD</h1>
+            <h1 style="color: var(--ds-blurple); margin-top: -15px;">MagicMC</h1>
+            <p>Stai per entrare nella community ufficiale di MagicMC. Sei pronto?</p>
+            <div class="btn-action btn-ds" onclick="joinDS()">ENTRA ORA</div>
+            <div class="btn-action" style="background:transparent; color:white; border:2px solid #333;" onclick="closeAll()">ANNULLA</div>
+        </div>
+    </div>
+
+    <div class="viewport">
+        <div class="wrapper" id="wrap">
+            <div class="section" id="sec-news"></div>
+            <div class="section" id="sec-servers"></div>
+            <div class="section" id="sec-mods"></div>
+            <div class="section" id="sec-cheats"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="label" id="cur-lab">NEWS</div>
+        <div class="dots">
+            <div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
         </div>
     </div>
 
     <script>
-        const wrapper = document.getElementById('mainWrapper');
-        const indicator = document.getElementById('indicator');
-        const buttons = document.querySelectorAll('.nav-btn');
-        let currentSection = 0;
-        let startX = 0;
+        const labs = ["NEWS", "SERVERS", "MODS", "CHEATS"];
+        
+        const newsData = [];
+        for(let i=1; i<=50; i++) newsData.push({t:`News v1.${21-i/5}`, d:`Tutte le novità della v1.${i}`, f:`Dettagli completi sulla versione 1.${i}. Nuovi mob, blocchi e ottimizzazioni del motore grafico.`});
 
-        // Funzione per muoversi tra le sezioni
-        function moveTo(index) {
-            currentSection = index;
-            wrapper.style.transform = `translateX(-${index * 100}vw)`;
-            
-            // Aggiorna Bottoni
-            buttons.forEach((btn, i) => {
-                btn.classList.toggle('selected', i === index);
+        const serverData = [
+            {t:"Hypixel", d:"mc.hypixel.net", f:"Il re dei mini-giochi: BedWars, Skyblock e molto altro."},
+            {t:"CoralMC", d:"mc.coralmc.it", f:"Il miglior server italiano per le Bedwars competitive."},
+            {t:"2b2t", d:"2b2t.org", f:"Anarchia pura dal 2010. Nessuna regola, solo sopravvivenza."},
+            {t:"Wynncraft", d:"play.wynncraft.com", f:"L'RPG più grande mai creato su Minecraft Java."},
+            {t:"PikaNetwork", d:"play.pika-network.net", f:"Server internazionale aperto anche ai non-premium."},
+            {t:"JartexNetwork", d:"play.jartexnetwork.com", f:"Modalità classiche: Fazioni, Skyblock e KitPvP."},
+            {t:"CubeCraft", d:"play.cubecraft.net", f:"Partner Microsoft con EggWars e giochi rapidi."},
+            {t:"Complex Gaming", d:"hub.mccomplex.com", f:"I migliori server Pixelmon e Survival."},
+            {t:"ManaCube", d:"play.manacube.com", f:"Parkour, Creative e community attiva."},
+            {t:"Purple Prison", d:"purpleprison.net", f:"Il miglior server Prison con economia bilanciata."},
+            {t:"ViperMC", d:"play.vipermc.net", f:"Il tempio mondiale delle HCF."},
+            {t:"Herobrine.org", d:"herobrine.org", f:"Survival e Skyblock bilanciato e divertente."},
+            {t:"Minemen Club", d:"minemen.club", f:"Allenamento PvP tecnico 1v1."},
+            {t:"Fearless", d:"mc.fearless.it", f:"Survival italiano innovativo."},
+            {t:"LushSurvival", d:"play.lushsurvival.net", f:"Survival tranquillo e costruzioni protette."},
+            {t:"GommeHD", d:"gommehd.net", f:"Gigante tedesco del PvP."},
+            {t:"The Hive", d:"hivemc.com", f:"Mini-giochi veloci e senza lag."},
+            {t:"AresMC", d:"mc.aresmc.it", f:"PvP competitivo italiano."},
+            {t:"CraftItaly", d:"mc.craftitaly.it", f:"Storico server nazionale."},
+            {t:"InvictaMC", d:"play.invictamc.net", f:"Divertimento italiano pulito."},
+            {t:"Mineplex", d:"mineplex.com", f:"Rilancio del network leggendario."},
+            {t:"Vortex Network", d:"play.vortexnetwork.net", f:"Space Prison a tema."},
+            {t:"Lifeboat", d:"play.lbsg.net", f:"Leader mobile Bedrock."},
+            {t:"Galaxite", d:"play.galaxite.net", f:"Esperienza spaziale Bedrock."},
+            {t:"Aternos MC", d:"play.aternos.me", f:"Server privati per amici."},
+            {t:"MCCentral", d:"mccentral.org", f:"Pilastro storico Java."},
+            {t:"Minehut", d:"minehut.com", f:"Piattaforma server community."},
+            {t:"Wilderness", d:"play.wilderness.net", f:"Survival Hardcore estremo."},
+            {t:"Mox MC", d:"moxmc.net", f:"Qualità creativa italiana."},
+            {t:"DestinyMC", d:"play.destinymc.com", f:"Skyblock classico."},
+            {t:"Mineville", d: "play.mineville.net", f: "Roleplay sociale."},
+            {t:"OriginMC", d: "play.originmc.org", f: "Fazioni competitive."},
+            {t:"Sky-Element", d: "play.skyelement.net", f: "Skyblock magico GDR."},
+            {t:"Bedwars Club", d: "bw.club", f: "Solo Bedwars h24."},
+            {t:"PvP Legacy", d: "play.pvplegacy.net", f: "Allenamento 1.9 Combat."},
+            {t:"Ancient MC", d: "play.ancient.net", f: "Survival storico."},
+            {t:"ZloyMC", d: "play.zloymc.com", f: "Survival tecnico tecnico."},
+            {t:"Empire MC", d: "empireminecraft.com", f: "Cooperazione build."},
+            {t:"EcoCityCraft", d: "ecocitycraft.com", f: "Economia reale."},
+            {t:"Shotbow", d: "shotbow.net", f: "Modalità MineZ."},
+            {t:"LemonCloud", d: "play.lemoncloud.net", f: "Relax Skyblock."},
+            {t:"MineSaga", d: "play.minesaga.org", f: "Boss dungeon."},
+            {t:"WildWood", d: "play.wildwood.net", f: "Biomi custom."},
+            {t:"CosmicPvP", d: "cosmicpvp.com", f: "Fazioni custom."},
+            {t:"ExtremeCraft", d: "play.extremecraft.net", f: "Hub Java."},
+            {t:"Mox Italy", d: "play.moxitaly.it", f: "Hub italiano."},
+            {t:"Parkour.com", d: "parkour.com", f: "Solo salti."},
+            {t:"Survival Lab", d: "play.sl.it", f: "Survival estremo."},
+            {t:"InPvP", d: "play.inpvp.net", f: "Bedrock Games."},
+            {t:"PixelmonMod", d: "play.pixelmonmod.com", f: "Pokemon MC."}
+        ];
+
+        const modData = [
+            {t:"Sodium", d:"Ottimizzazione FPS.", f:"Sostituisce il motore grafico per massime prestazioni."},
+            {t:"Iris Shaders", d:"Grafica Realistica.", f:"Supporto per gli Shaders su Fabric."},
+            {t:"JourneyMap", d:"Mappa & Radar.", f:"Mappa completa del mondo in tempo reale."},
+            {t:"JEI", d:"Ricettario.", f:"Vedi ogni ricetta di crafting del gioco."},
+            {t:"WorldEdit", d:"Costruzione Rapida.", f:"Comandi per modificare il mondo istantaneamente."},
+            {t:"Lithium", d:"Ottimizzazione Logica.", f:"Riduce il lag del server e del gioco."},
+            {t:"Create", d:"Ingegneria Meccanica.", f:"Fabbriche e treni automatizzati."},
+            {t:"Waystones", d:"Teletrasporto.", f:"Viaggia tra basi lontane con pietre magiche."},
+            {t:"Alex's Mobs", d:"80+ Animali.", f:"Elefanti, coccodrilli e fauna complessa."},
+            {t:"Physics Mod", d:"Fisica Reale.", f:"I blocchi cadono con gravità reale."},
+            {t:"Twilight Forest", d:"Nuova Dimensione.", f:"Dungeon e boss in una foresta magica."},
+            {t:"Backpacks", d:"Zaini Evoluti.", f:"Spazio extra per il tuo inventario."},
+            {t:"Mouse Tweaks", d:"Inventario Fast.", f:"Sposta oggetti trascinando il mouse."},
+            {t:"Clumps", d:"Meno Lag XP.", f:"Unisce le sfere di XP in un globo."},
+            {t:"FerriteCore", d:"Meno RAM.", f:"Riduce il consumo di memoria RAM."},
+            {t:"Carry On", d:"Solleva Blocchi.", f:"Sposta casse piene e animali con le mani."},
+            {t:"Xaero's Map", d:"Minimappa Leggera.", f:"Mappa rapida per PC meno potenti."},
+            {t:"Dynamic Lights", d:"Luce in Mano.", f:"Le torce illuminano mentre cammini."},
+            {t:"Biomes O' Plenty", d:"Nuovi Biomi.", f:"Foreste e praterie colorate."},
+            {t:"Iron Chests", d:"Casse Metallo.", f:"Casse giganti in ferro e diamante."},
+            {t:"FastLeafDecay", d:"Foglie Veloci.", f:"Le foglie cadono subito dopo il taglio."},
+            {t:"Nature's Compass", d:"Trova Biomi.", f:"Bussola magica verso i biomi."},
+            {t:"Sound Physics", d:"Audio 3D.", f:"Eco e riverbero nelle grotte."},
+            {t:"Better 3rd Person", d:"Visuale 360°.", f:"Telecamera libera in terza persona."},
+            {t:"Controlling", d:"Gestione Tasti.", f:"Risolve i conflitti tra le mod."},
+            {t:"Antique Atlas", d:"Mappa Antica.", f:"Mappa stile libro di carta."},
+            {t:"Farmer's Delight", d:"Cucina Chef.", f:"Nuovi piatti e strumenti cucina."},
+            {t:"Decorative Blocks", d:"Arredo Pro.", f:"Blocchi belli per decorare casa."},
+            {t:"AppleSkin", d:"Info Fame.", f:"Vedi saturazione e nutrimento."},
+            {t:"Simple Voice Chat", d:"Proximity Chat.", f:"Parla con i giocatori vicini."}
+        ];
+
+        const cheatData = [
+            {t: "Meteor Client", d: "Re del 1.20+", f: "Miglior client gratis con KillAura e CrystalAura."},
+            {t: "Future Client", d: "Top Anarchia", f: "Indispensabile per 2b2t e bypass forti."},
+            {t: "Rusherhack", d: "Utility Royale", f: "Miglior client per viaggiare nell'End."},
+            {t: "Vape V4", d: "Ghost Client", f: "Invisibile agli screen-share per server competitivi."},
+            {t: "Rise Client", d: "Bypass estremi", f: "Perfetto per distruggere i server protetti."},
+            {t: "LiquidBounce", d: "Configurazione", f: "Crea i tuoi bypass personalizzati."},
+            {t: "Impact Client", d: "Classico 1.12", f: "Affidabile per le vecchie versioni."},
+            {t: "Wurst Client", d: "Semplice", f: "Ideale per iniziare a chettare."},
+            {t: "Aristois", d: "Aggiornato", f: "Supporta sempre le ultime versioni."},
+            {t: "Kami Blue", d: "Utility", f: "Viaggia km e km senza fatica."},
+            {t: "Phobos", d: "Crystal PvP", f: "Velocità estrema nei combattimenti."},
+            {t: "SalHack", d: "Esperto", f: "Automazioni tecniche avanzate."},
+            {t: "Lambda", d: "Leggero", f: "Moderno e veloce sulle utility."},
+            {t: "BleachHack", d: "Fabric Power", f: "Devastante per le ultime release."},
+            {t: "Raven B+", d: "Hypixel Ghost", f: "Bypass specifici per server protetti."},
+            {t: "Sigma 5", d: "Futuristico", f: "Design unico e moduli potenti."},
+            {t: "Wurst+3", d: "PvP Power", f: "Ottimizzato per il Crystal PvP."},
+            {t: "Ares", d: "Combat 1.9+", f: "Moduli per le nuove versioni."},
+            {t: "Seppuku", d: "Explorer", f: "Trova monumenti nell'anarchia."},
+            {t: "Inertia", d: "Completo", f: "Mix tra utility e cheat."}
+        ];
+
+        function fill(d, id) {
+            const l = document.getElementById(id);
+            d.forEach(x => {
+                const e = document.createElement('div');
+                e.className = 'card';
+                e.onclick = () => openM(x.t, x.f);
+                e.innerHTML = `<h2>${x.t}</h2><p>${x.d}</p>`;
+                l.appendChild(e);
             });
-            
-            // Muovi indicatore barra
-            indicator.style.left = `calc(${index * 33.33}% + 5px)`;
-            
-            if(window.navigator.vibrate) window.navigator.vibrate(15);
         }
 
-        // LOGICA SWIPE (Touch)
-        document.addEventListener('touchstart', e => {
-            startX = e.touches[0].clientX;
-        });
+        fill(newsData, 'sec-news'); fill(serverData, 'sec-servers'); fill(modData, 'sec-mods'); fill(cheatData, 'sec-cheats');
 
-        document.addEventListener('touchend', e => {
-            const endX = e.changedTouches[0].clientX;
-            const diff = startX - endX;
+        const modals = [document.getElementById('modal'), document.getElementById('ds-modal')];
+        
+        function openM(t, p) { 
+            document.getElementById('mT').innerText = t; 
+            document.getElementById('mP').innerText = p; 
+            document.getElementById('modal').style.display = 'flex';
+            setTimeout(() => document.getElementById('modal').classList.add('active'), 10);
+        }
+        
+        function openDS() { 
+            document.getElementById('ds-modal').style.display = 'flex';
+            setTimeout(() => document.getElementById('ds-modal').classList.add('active'), 10);
+        }
 
-            if (Math.abs(diff) > 50) { // Sensibilità swipe
-                if (diff > 0 && currentSection < 2) {
-                    moveTo(currentSection + 1); // Swipe Sinistra -> Va a destra
-                } else if (diff < 0 && currentSection > 0) {
-                    moveTo(currentSection - 1); // Swipe Destra -> Va a sinistra
+        function closeAll() {
+            modals.forEach(m => {
+                if(m.classList.contains('active')) {
+                    m.classList.add('closing');
+                    setTimeout(() => {
+                        m.classList.remove('active', 'closing');
+                        m.style.display = 'none';
+                    }, 400);
                 }
+            });
+        }
+
+        function joinDS() { window.open("https://discord.gg/xY9HNSKEvB", "_blank"); closeAll(); }
+
+        const wrap = document.getElementById('wrap'), dots = document.querySelectorAll('.dot'), lab = document.getElementById('cur-lab');
+        let cur = 0, sX = 0, sY = 0;
+
+        function update(i) {
+            cur = i; wrap.style.transform = `translateX(-${i * 100}vw)`;
+            dots.forEach((d, k) => d.classList.toggle('active', k === i));
+            lab.innerText = labs[i];
+        }
+
+        document.addEventListener('touchstart', e => { sX = e.touches[0].clientX; sY = e.touches[0].clientY; }, {passive: true});
+        document.addEventListener('touchend', e => {
+            let dX = sX - e.changedTouches[0].clientX, dY = sY - e.changedTouches[0].clientY;
+            if (Math.abs(dX) > 70 && Math.abs(dX) > Math.abs(dY)) {
+                if (dX > 0 && cur < 3) update(cur + 1);
+                else if (dX < 0 && cur > 0) update(cur - 1);
             }
         });
     </script>
-
 </body>
 </html>
