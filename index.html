@@ -24,10 +24,8 @@
             height: 100vh; width: 100vw; overflow: hidden;
         }
 
-        /* SFONDO MODIFICATO: PIÙ VISIBILE E SFOCATO */
         .bg-img {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            /* Ridotto l'oscuramento (da 0.7 a 0.35) per mostrare meglio l'immagine */
             background: linear-gradient(rgba(0,0,0,0.35), var(--bg)), 
                         url('https://server.wallpaperalchemy.com/storage/wallpapers/259/minecraft-4k-wallpaper-sunlit-forest-canopy.jpg');
             background-size: cover; background-position: center;
@@ -36,7 +34,6 @@
         }
 
         header { padding: 30px 25px; display: flex; justify-content: space-between; align-items: center; }
-        /* NOME CAMBIATO IN MC NEWS */
         .logo { font-size: 1.8rem; text-transform: uppercase; letter-spacing: -1.5px; }
         .logo span { color: var(--neon); text-shadow: 0 0 15px var(--neon); }
 
@@ -89,7 +86,7 @@
         .footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 30px 0; text-align: center; }
         .label { color: var(--neon); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 15px; }
         .dots { display: flex; gap: 15px; justify-content: center; }
-        .dot { width: 10px; height: 10px; background: rgba(255,255,255,0.2); border-radius: 50%; transition: 0.4s; }
+        .dot { width: 10px; height: 10px; background: rgba(255,255,255,0.2); border-radius: 50%; transition: 0.4s; cursor: pointer; }
         .dot.active { background: var(--neon); transform: scale(1.6); box-shadow: 0 0 15px var(--neon); }
     </style>
 </head>
@@ -136,7 +133,10 @@
     <div class="footer">
         <div class="label" id="cur-lab">NEWS</div>
         <div class="dots">
-            <div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot active" onclick="update(0)"></div>
+            <div class="dot" onclick="update(1)"></div>
+            <div class="dot" onclick="update(2)"></div>
+            <div class="dot" onclick="update(3)"></div>
         </div>
     </div>
 
@@ -150,7 +150,7 @@
             {t:"Hypixel", d:"mc.hypixel.net", f:"Il re dei mini-giochi: BedWars, Skyblock e molto altro."},
             {t:"CoralMC", d:"mc.coralmc.it", f:"Il miglior server italiano per le Bedwars competitive."},
             {t:"2b2t", d:"2b2t.org", f:"Anarchia pura dal 2010. Nessuna regola, solo sopravvivenza."},
-            {t:"Wynncraft", d:"play.wynncraft.com", f:"Il più grande MMORPG creato su Minecraft Java."},
+            {t:"Wynncraft", d:"play.wynncraft.com", f:"L'RPG più grande mai creato su Minecraft Java."},
             {t:"PikaNetwork", d:"play.pika-network.net", f:"Server internazionale aperto anche ai non-premium."},
             {t:"JartexNetwork", d:"play.jartexnetwork.com", f:"Modalità classiche: Fazioni, Skyblock e KitPvP."},
             {t:"CubeCraft", d:"play.cubecraft.net", f:"Partner Microsoft con EggWars e giochi rapidi."},
@@ -166,7 +166,7 @@
             {t:"The Hive", d:"hivemc.com", f:"Mini-giochi veloci e senza lag."},
             {t:"AresMC", d:"mc.aresmc.it", f:"PvP competitivo italiano."},
             {t:"CraftItaly", d:"mc.craftitaly.it", f:"Storico server nazionale."},
-            {t:"InvictaMC", d:"play.invictamc.net", f:"Divertimento italiano piulito."},
+            {t:"InvictaMC", d:"play.invictamc.net", f:"Divertimento italiano pulito."},
             {t:"Mineplex", d:"mineplex.com", f:"Rilancio del network leggendario."},
             {t:"Vortex Network", d:"play.vortexnetwork.net", f:"Space Prison a tema."},
             {t:"Lifeboat", d:"play.lbsg.net", f:"Leader mobile Bedrock."},
@@ -304,6 +304,13 @@
             dots.forEach((d, k) => d.classList.toggle('active', k === i));
             lab.innerText = labs[i];
         }
+
+        // SUPPORTO TASTIERA PC (FRECCE DESTRA/SINISTRA)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "ArrowRight" && cur < 3) update(cur + 1);
+            if (e.key === "ArrowLeft" && cur > 0) update(cur - 1);
+            if (e.key === "Escape") closeAll();
+        });
 
         document.addEventListener('touchstart', e => { sX = e.touches[0].clientX; sY = e.touches[0].clientY; }, {passive: true});
         document.addEventListener('touchend', e => {
