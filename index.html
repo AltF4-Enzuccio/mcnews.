@@ -46,7 +46,7 @@
         .ds-btn:active { transform: scale(0.85); }
         .ds-btn svg { width: 32px; height: 32px; fill: white; }
 
-        .viewport { width: 100vw; height: calc(100vh - 210px); overflow: hidden; position: relative; }
+        .viewport { width: 100vw; height: calc(100vh - 220px); overflow: hidden; position: relative; }
         .wrapper { display: flex; width: 400vw; height: 100%; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
         .section { width: 100vw; height: 100%; overflow-y: auto; padding: 10px 20px 220px; -webkit-overflow-scrolling: touch; }
 
@@ -83,11 +83,22 @@
         }
         .btn-ds { background: var(--ds-blurple); color: white; border: none; font-size: 1.3rem; }
 
-        .footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 30px 0; text-align: center; }
-        .label { color: var(--neon); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 15px; }
-        .dots { display: flex; gap: 15px; justify-content: center; }
-        .dot { width: 10px; height: 10px; background: rgba(255,255,255,0.2); border-radius: 50%; transition: 0.4s; cursor: pointer; }
-        .dot.active { background: var(--neon); transform: scale(1.6); box-shadow: 0 0 15px var(--neon); }
+        /* NUOVA NAVBAR CON TASTI CLICCABILI */
+        .footer-nav {
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(20px);
+            padding: 8px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1);
+            display: flex; gap: 5px; z-index: 999; width: 90%; max-width: 500px;
+        }
+        .nav-tab {
+            flex: 1; padding: 12px 5px; border-radius: 20px; border: none;
+            background: transparent; color: #888; font-size: 0.75rem;
+            cursor: pointer; transition: 0.3s; text-transform: uppercase;
+        }
+        .nav-tab.active {
+            background: rgba(114, 255, 19, 0.15); color: var(--neon);
+            box-shadow: inset 0 0 10px rgba(114, 255, 19, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -130,19 +141,14 @@
         </div>
     </div>
 
-    <div class="footer">
-        <div class="label" id="cur-lab">NEWS</div>
-        <div class="dots">
-            <div class="dot active" onclick="update(0)"></div>
-            <div class="dot" onclick="update(1)"></div>
-            <div class="dot" onclick="update(2)"></div>
-            <div class="dot" onclick="update(3)"></div>
-        </div>
+    <div class="footer-nav">
+        <button class="nav-tab active" onclick="update(0)">News</button>
+        <button class="nav-tab" onclick="update(1)">Servers</button>
+        <button class="nav-tab" onclick="update(2)">Mods</button>
+        <button class="nav-tab" onclick="update(3)">Cheats</button>
     </div>
 
     <script>
-        const labs = ["NEWS", "SERVERS", "MODS", "CHEATS"];
-        
         const newsData = [];
         for(let i=1; i<=50; i++) newsData.push({t:`News v1.${21-i/5}`, d:`Tutte le novità della v1.${i}`, f:`Dettagli completi sulla versione 1.${i}. Nuovi mob, blocchi e ottimizzazioni del motore grafico.`});
 
@@ -296,16 +302,15 @@
 
         function joinDS() { window.open("https://discord.gg/xY9HNSKEvB", "_blank"); closeAll(); }
 
-        const wrap = document.getElementById('wrap'), dots = document.querySelectorAll('.dot'), lab = document.getElementById('cur-lab');
+        const wrap = document.getElementById('wrap'), tabs = document.querySelectorAll('.nav-tab');
         let cur = 0, sX = 0, sY = 0;
 
         function update(i) {
-            cur = i; wrap.style.transform = `translateX(-${i * 100}vw)`;
-            dots.forEach((d, k) => d.classList.toggle('active', k === i));
-            lab.innerText = labs[i];
+            cur = i;
+            wrap.style.transform = `translateX(-${i * 100}vw)`;
+            tabs.forEach((t, k) => t.classList.toggle('active', k === i));
         }
 
-        // SUPPORTO TASTIERA PC (FRECCE DESTRA/SINISTRA)
         document.addEventListener('keydown', (e) => {
             if (e.key === "ArrowRight" && cur < 3) update(cur + 1);
             if (e.key === "ArrowLeft" && cur > 0) update(cur - 1);
